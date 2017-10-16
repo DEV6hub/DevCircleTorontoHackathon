@@ -168,6 +168,8 @@ app.post('/webhook', function (req, res) {
   }
 });
 
+callSendProfile();
+
 /*
  * Message Event
  *
@@ -454,6 +456,41 @@ function callSendAPI(messageData) {
       }
     } else {
       console.error("[callSendAPI] Send API call failed", response.statusCode, response.statusMessage, body.error);
+    }
+  });  
+}
+
+/*
+ * Send profile info. This will setup the bot with a greeting and a Get Started button
+ */
+function callSendProfile() {
+  request({
+    uri: 'https://graph.facebook.com/v2.6/me/messenger_profile',
+    qs: { access_token: FB_PAGE_ACCESS_TOKEN },
+    method: 'POST',
+    json: {
+      "greeting":[
+          {
+          "locale":"default",
+          "text":`Hi there! I'm a bot here to assist you with Candyboxx's Shopify store. To get started, click the "Get Started" button or type "help".`
+          }
+      ] ,
+      "get_started": {
+        "payload": JSON.stringify({action: 'QR_GET_PRODUCT_LIST', limit: 3})
+      }
+    }
+
+  }, function (error, response, body) {
+    if (!error && response.statusCode == 200) {
+      console.log("[callSendProfile]: ", body);
+      var result = body.result;
+      if (result === 'success') {
+        console.log("[callSendProfile] Successfully sent profile.");
+      } else {
+        console.error("[callSendProfile] There was an error sending profile.");
+      }
+    } else {
+      console.error("[callSendProfile] Send profile call failed", response.statusCode, response.statusMessage, body.error);
     }
   });  
 }
