@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+	<script>
+	(function(d, s, id){
+		var js, fjs = d.getElementsByTagName(s)[0];
+		if (d.getElementById(id)) {return;}
+		js = d.createElement(s); js.id = id;
+		js.src = "//connect.facebook.com/en_US/messenger.Extensions.js";
+		fjs.parentNode.insertBefore(js, fjs);
+	}(document, 'script', 'Messenger'));
+
+	window.extAsyncInit = function() {
+		var searchParams = new URLSearchParams(window.location.search); 
+		getProduct(searchParams.get("id"));
+	};
+	function  getProduct(product_id) {
+		if (!product_id) {
+			document.getElementById('productId').innerHTML = 'Failed to load product';
+			return;
+		}
+		var xhr = new XMLHttpRequest();
+		xhr.open('GET', '/product_description?id='+product_id);
+		xhr.onload = function() {
+			if (xhr.status === 200) {
+				document.getElementById('productId').innerHTML = xhr.responseText;
+			}
+			else {
+				document.getElementById('productId').innerHTML = 'Failed to load product';
+			}
+		};
+		xhr.send();
+  	}
+	</script>
+</head>
+<body >
+	<div id="productId">
+		Loading product...
+	</div>
+</body>
+</html>
+
+
+

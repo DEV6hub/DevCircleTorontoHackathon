@@ -58,8 +58,12 @@ const SHOPIFY_API_PASSWORD = (process.env.SHOP_API_PASSWORD) ?
   process.env.SHOP_API_PASSWORD :
   config.get('sh_apiPassword');  
 
+const HOST_URL = (process.env.HOST_URL) ? 
+  process.env.HOST_URL :
+  config.get('host_url');  
+
 // make sure that everything has been properly configured
-if (!(FB_APP_SECRET && FB_VALIDATION_TOKEN && FB_PAGE_ACCESS_TOKEN && SHOPIFY_SHOP_NAME && SHOPIFY_API_KEY && SHOPIFY_API_PASSWORD)) {
+if (!(FB_APP_SECRET && FB_VALIDATION_TOKEN && FB_PAGE_ACCESS_TOKEN && SHOPIFY_SHOP_NAME && SHOPIFY_API_KEY && SHOPIFY_API_PASSWORD && HOST_URL)) {
   console.error("Missing config values");
   process.exit(1);
 }
@@ -116,6 +120,24 @@ app.get('/webhook', function(req, res) {
   }  
 });
 
+app.get('/product_description', function(req, res) {
+  var product_id = req.query['id'];
+  if (product_id !== 'null') {
+    console.log("[app.get] product id:" + product_id);
+    var sh_product = shopify.product.get(product_id);
+    sh_product.then(function(product) {
+      console.log(product.options[0].values);
+      res.status(200).send(product.body_html);
+    }, function(error) {
+      console.error("Error retrieving product");
+      res.sendStatus(400).send("Error retrieving product");
+    });
+    
+  } else {
+    console.error("Product id is required");
+    res.sendStatus(400).send("Product id is required");          
+  }  
+});
 
 /*
  * All callbacks for Messenger are POST-ed. They will be sent to the same
@@ -167,8 +189,6 @@ app.post('/webhook', function (req, res) {
     res.sendStatus(200);
   }
 });
-
-callSendProfile();
 
 /*
  * Message Event
@@ -308,12 +328,20 @@ function respondToHelpRequestWithTemplates(recipientId, requestForHelpOnFeature)
       var products = shopify.product.list({ limit: requestPayload.limit});
       products.then(function(listOfProducs) {
         listOfProducs.forEach(function(product) {
+          var url = HOST_URL + "/product.html?id="+product.id;
           templateElements.push({
             title: product.title,
             subtitle: product.tags,
             image_url: product.image.src,
-            buttons: [
-              sectionButton('Read description', 'QR_GET_PRODUCT_DESCRIPTION', {id: product.id})
+            buttons:[
+              {
+                "type":"web_url",
+                "url": url,
+                "title":"Read description",
+                "webview_height_ratio": "compact",
+                "messenger_extensions": "true"
+              },
+              sectionButton('Get options', 'QR_GET_PRODUCT_OPTIONS', {id: product.id})
             ]
           });
         });
@@ -340,15 +368,19 @@ function respondToHelpRequestWithTemplates(recipientId, requestForHelpOnFeature)
 
       break;
 
-    case 'QR_GET_PRODUCT_DESCRIPTION':
+    case 'QR_GET_PRODUCT_OPTIONS':
       var sh_product = shopify.product.get(requestPayload.id);
       sh_product.then(function(product) {
+        var options = '';
+        product.options.map(function(option) {
+          options = options + option.name + ': ' + option.values.join(',') + "\n";
+        });
         var messageData = {
           recipient: {
             id: recipientId
           },
           message: {
-            text: product.body_html.substring(0, 640),
+            text: options.substring(0, 640),
             quick_replies: [
               textButton('Get 3 products', 'QR_GET_PRODUCT_LIST', {limit: 3})
             ]
@@ -360,7 +392,6 @@ function respondToHelpRequestWithTemplates(recipientId, requestForHelpOnFeature)
 
 
       break;
-  
   }
 
 }
@@ -477,7 +508,10 @@ function callSendProfile() {
       ] ,
       "get_started": {
         "payload": JSON.stringify({action: 'QR_GET_PRODUCT_LIST', limit: 3})
-      }
+      },
+      "whitelisted_domains":[
+        "https://40d0b5a0.ngrok.io"
+      ]
     }
 
   }, function (error, response, body) {
@@ -502,6 +536,7 @@ function callSendProfile() {
  */
 app.listen(app.get('port'), function() {
   console.log('[app.listen] Node app is running on port', app.get('port'));
+  callSendProfile();
 });
 
 module.exports = app;
