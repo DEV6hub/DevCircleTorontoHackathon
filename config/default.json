@@ -2,8 +2,8 @@
     "fb_appSecret": "22893b585357348831f0a8533200d9d6",
     "fb_pageAccessToken": "EAAG73wx7VEYBAHnHBISQwH3QtfkesRGQvUHW2oAUg5b3IKUhq4AyP9zgHHRqwKtw8ayBfmvZAOjVZAQFQs0Dj9zITNnhtfCEONo2JG3i1Sj8tji0qFQQiWuCtG5KnzZAJhog5vNG80HW67JpZAqDZBpgoVhjMooUuMjPgheTluAZDZD",
     "fb_validationToken": "Facebook_DevCircle_Toronto_2017",
-    "sh_shopName": "dev6-test-store",
-    "sh_apiKey": "c063ec4c74a03dc549fd28eff756bcc8",
-    "sh_apiPassword": "0427045b45d317ffcb8270c4d4354039",
+    "sh_shopName": "dev-circle-toronto-hackathon",
+    "sh_apiKey": "cef0ce6a17943ab137349bb1895f118e",
+    "sh_apiPassword": "5e27b0707f13fba4a8a3d3391690e21f",
     "host_url": "https://40d0b5a0.ngrok.io"
 }
