@@ -98,6 +98,9 @@ function verifyRequestSignature(req, res, buf) {
                         .update(buf)
                         .digest('hex');
 
+    //console.log("signatureHash: " + signatureHash);
+    //console.log("expectedHash: " + expectedHash);
+
     if (signatureHash != expectedHash) {
       throw new Error("Couldn't validate the request signature.");
     }
@@ -120,6 +123,9 @@ app.get('/webhook', function(req, res) {
   }  
 });
 
+/**
+ * serves a static page for the webview
+ */ 
 app.get('/product_description', function(req, res) {
   var product_id = req.query['id'];
   if (product_id !== 'null') {
@@ -184,7 +190,7 @@ app.post('/webhook', function (req, res) {
 
     // Assume all went well.
     //
-    // You must send back a 200, within 20 seconds, to let us know you've 
+    // You must send back a 200 within 20 seconds to let us know you've 
     // successfully received the callback. Otherwise, the request will time out.
     res.sendStatus(200);
   }
@@ -232,8 +238,7 @@ function receivedMessage(event) {
 }
 
 /*
- * Send a message with buttons that allow the user to select from 
- * three of the four features.
+ * Send a message with buttons.
  *
  */
 function sendHelpOptionsAsButtonTemplates(recipientId) {
@@ -254,7 +259,7 @@ function sendHelpOptionsAsButtonTemplates(recipientId) {
               "title":"Get 3 products",
               "payload":JSON.stringify({action: 'QR_GET_PRODUCT_LIST', limit: 3})
             }
-            // limit of up to three buttons 
+            // limit of three buttons 
           ]
         }
       }
@@ -296,9 +301,6 @@ function respondToHelpRequestWithTemplates(recipientId, requestForHelpOnFeature)
 
   var requestPayload = JSON.parse(requestForHelpOnFeature);
 
-  // each button must be of type postback but title
-  // and payload are variable depending on which 
-  // set of options you want to provide
   var sectionButton = function(title, action, options) {
     var payload = options | {};
     payload = Object.assign(options, {action: action});
@@ -318,10 +320,6 @@ function respondToHelpRequestWithTemplates(recipientId, requestForHelpOnFeature)
       payload: JSON.stringify(payload)
     };
   }
-
-  // Since there are only four options in total, we will provide 
-  // buttons for each of the remaining three with each section. 
-  // This provides the user with maximum flexibility to navigate
 
   switch (requestPayload.action) {
     case 'QR_GET_PRODUCT_LIST':
@@ -510,7 +508,7 @@ function callSendProfile() {
         "payload": JSON.stringify({action: 'QR_GET_PRODUCT_LIST', limit: 3})
       },
       "whitelisted_domains":[
-        "https://40d0b5a0.ngrok.io"
+        HOST_URL
       ]
     }
 
