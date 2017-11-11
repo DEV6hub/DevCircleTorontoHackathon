@@ -38,12 +38,11 @@ Follow these steps to get your team's bot configured and off the ground.
 ## Start your server and ngrok tunnel
 > You must run your server so that the Messenger Platform can verify that your webhook is available 
 * Run `npm install` from the project root folder to install all dependencies
-* Run `npm start` to start the node server
 * Run `ngrok http 5000` to get a public URL to your node server. DO NOT CLOSE THIS WINDOW!!!
 * Update config/default.json 
     * "host_url": "https://{your unique url}.ngrok.io"
     * If you close/restart the ngrok service, update this field with the new URL and restart the node server.
-* Restart the node server to ensure that it reads and uses the new host_url config value
+* Run `npm start` to start the node server
 
 ## Configure your Facebook application - Part II
 
